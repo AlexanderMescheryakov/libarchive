@@ -83,6 +83,8 @@ struct read_file_data {
 	} filename; /* Must be last! */
 };
 
+int stdin_pipe_fd = 0;
+
 static int	file_open(struct archive *, void *);
 static int	file_close(struct archive *, void *);
 static int file_close2(struct archive *, void *);
@@ -243,7 +245,11 @@ file_open(struct archive *a, void *client_data)
 		 * API is intended to be a little smarter for folks who
 		 * want easy handling of the common case.
 		 */
+#ifdef __vxworks
+        fd = stdin_pipe_fd;
+#else
 		fd = 0;
+#endif
 #if defined(__CYGWIN__) || defined(_WIN32)
 		setmode(0, O_BINARY);
 #endif
@@ -375,7 +381,7 @@ fail:
 	 * Don't close file descriptors not opened or ones pointing referring
 	 * to `FNT_STDIN`.
 	 */
-	if (fd != -1 && fd != 0)
+	if (fd != -1 && fd != 0 && fd != stdin_pipe_fd)
 		close(fd);
 	return (ARCHIVE_FATAL);
 }
@@ -556,7 +562,7 @@ file_close2(struct archive *a, void *client_data)
 			} while (bytesRead > 0);
 		}
 		/* If a named file was opened, then it needs to be closed. */
-		if (mine->filename_type != FNT_STDIN)
+		if (mine->filename_type != FNT_STDIN && mine->fd != stdin_pipe_fd)
 			close(mine->fd);
 	}
 	free(mine->buffer);

@@ -26,6 +26,19 @@
 
 #include "archive_platform.h"
 
+#ifdef __vxworks
+long
+__archive_create_child(const char *cmd, int *child_stdin, int *child_stdout)
+{
+    return 0;
+}
+
+void
+__archive_check_child(int in, int out)
+{
+}
+#endif
+
 /* This capability is only available on POSIX systems. */
 #if defined(HAVE_PIPE) && defined(HAVE_FCNTL) && \
     (defined(HAVE_FORK) || defined(HAVE_VFORK) || defined(HAVE_POSIX_SPAWNP))

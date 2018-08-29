@@ -2503,7 +2503,9 @@ get_gmoffset(struct tm *tm)
 {
 	long offset;
 
-#if defined(HAVE__GET_TIMEZONE)
+#ifdef __vxworks
+	return 0;
+#elif defined(HAVE__GET_TIMEZONE)
 	_get_timezone(&offset);
 #elif defined(__CYGWIN__) || defined(__MINGW32__) || defined(__BORLANDC__)
 	offset = _timezone;
@@ -5184,6 +5186,18 @@ isoent_free_all(struct isoent *isoent)
 		}
 	}
 }
+
+#ifdef __vxworks
+static int getuid()
+{
+	return 0;
+}
+
+static int getgid()
+{
+	return 0;
+}
+#endif
 
 static struct isoent *
 isoent_create_virtual_dir(struct archive_write *a, struct iso9660 *iso9660, const char *pathname)

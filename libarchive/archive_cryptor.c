@@ -153,7 +153,7 @@ aes_ctr_encrypt_counter(archive_crypto_ctx *ctx)
 	CCCryptorStatus r;
 
 	r = CCCryptorReset(ref, NULL);
-	if (r != kCCSuccess && r != kCCUnimplemented)
+	if (r != kCCSuccess)
 		return -1;
 	r = CCCryptorUpdate(ref, ctx->nonce, AES_BLOCK_SIZE, ctx->encr_buf,
 	    AES_BLOCK_SIZE, NULL);

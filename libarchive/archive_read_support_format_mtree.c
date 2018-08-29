@@ -1237,9 +1237,12 @@ parse_file(struct archive_read *a, struct archive_entry *entry,
 				mtree->fd = -1;
 				st = NULL;
 			}
-		} else if (lstat(path, st) == -1) {
+		}
+#ifndef __vxworks
+		else if (lstat(path, st) == -1) {
 			st = NULL;
 		}
+#endif
 
 		/*
 		 * Check for a mismatch between the type in the specification
@@ -1315,7 +1318,9 @@ parse_file(struct archive_read *a, struct archive_entry *entry,
 				archive_entry_set_uid(entry, st->st_uid);
 			if ((parsed_kws & MTREE_HAS_MTIME) == 0 ||
 			    (parsed_kws & MTREE_HAS_NOCHANGE) != 0) {
-#if HAVE_STRUCT_STAT_ST_MTIMESPEC_TV_NSEC
+#ifdef __vxworks
+
+#elif HAVE_STRUCT_STAT_ST_MTIMESPEC_TV_NSEC
 				archive_entry_set_mtime(entry, st->st_mtime,
 						st->st_mtimespec.tv_nsec);
 #elif HAVE_STRUCT_STAT_ST_MTIM_TV_NSEC

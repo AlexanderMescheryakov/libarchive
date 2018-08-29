@@ -76,10 +76,12 @@ archive_entry_strmode(struct archive_entry *entry)
 		if (mode & 0010) bp[6] = 's';
 		else bp[6] = 'S';
 	}
+#ifndef __vxworks
 	if (mode & S_ISVTX) {
 		if (mode & 0001) bp[9] = 't';
 		else bp[9] = 'T';
 	}
+#endif
 	if (archive_entry_acl_types(entry) != 0)
 		bp[10] = '+';
 

@@ -40,6 +40,8 @@ __FBSDID("$FreeBSD$");
 #define strdup _strdup
 #endif
 
+extern int stdin_pipe_fd;
+
 /*
  * Read lines from file and do something with each one.  If option_null
  * is set, lines are terminated with zero bytes; otherwise, they're
@@ -69,7 +71,11 @@ lafe_line_reader(const char *pathname, int nullSeparator)
 	lr->pathname = strdup(pathname);
 
 	if (strcmp(pathname, "-") == 0)
+#ifdef __vxworks
+        lr->f = fdopen(stdin_pipe_fd, "r");
+#else
 		lr->f = stdin;
+#endif
 	else
 		lr->f = fopen(pathname, "r");
 	if (lr->f == NULL)
@@ -153,7 +159,7 @@ lafe_line_reader_next(struct lafe_line_reader *lr)
 		if (ferror(lr->f))
 			lafe_errc(1, errno, "Can't read %s", lr->pathname);
 		if (feof(lr->f)) {
-			if (lr->f != stdin)
+			if (lr->f != stdin && lr->f != stdin_pipe_fd)
 				fclose(lr->f);
 			lr->f = NULL;
 		}

@@ -417,12 +417,16 @@ lazy_stat(struct archive_write_disk *a)
 	 * XXX At this point, symlinks should not be hit, otherwise
 	 * XXX a race occurred.  Do we want to check explicitly for that?
 	 */
+#ifdef __vxworks
+	return (ARCHIVE_OK);
+#else
 	if (lstat(a->name, &a->st) == 0) {
 		a->pst = &a->st;
 		return (ARCHIVE_OK);
 	}
 	archive_set_error(&a->archive, errno, "Couldn't stat file");
 	return (ARCHIVE_WARN);
+#endif
 }
 
 static struct archive_vtable *
@@ -532,7 +536,9 @@ _archive_write_disk_header(struct archive *_a, struct archive_entry *entry)
 	 * user edits their umask during the extraction for some
 	 * reason.
 	 */
+#ifndef __vxworks
 	umask(a->user_umask = umask(0));
+#endif
 
 	/* Figure out what we need to do for this entry. */
 	a->todo = TODO_MODE_BASE;
@@ -567,7 +573,9 @@ _archive_write_disk_header(struct archive *_a, struct archive_entry *entry)
 		 */
 		a->mode &= ~S_ISUID;
 		a->mode &= ~S_ISGID;
+#ifndef __vxworks
 		a->mode &= ~S_ISVTX;
+#endif
 		a->mode &= ~a->user_umask;
 	}
 	if (a->flags & ARCHIVE_EXTRACT_OWNER)
@@ -1859,8 +1867,10 @@ archive_write_disk_new(void)
 	a->archive.state = ARCHIVE_STATE_HEADER;
 	a->archive.vtable = archive_write_disk_vtable();
 	a->start_time = time(NULL);
+#ifndef __vxworks
 	/* Query and restore the umask. */
 	umask(a->user_umask = umask(0));
+#endif
 #ifdef HAVE_GETEUID
 	a->user_uid = geteuid();
 #endif /* HAVE_GETEUID */
@@ -2019,12 +2029,14 @@ restore_entry(struct archive_write_disk *a)
 		 */
 		if (S_ISDIR(a->mode))
 			r = stat(a->name, &a->st);
+#ifndef __vxworks
 		/*
 		 * If it's not a dir (or it's a broken symlink),
 		 * then don't follow it.
 		 */
 		if (r != 0 || !S_ISDIR(a->mode))
 			r = lstat(a->name, &a->st);
+#endif
 		if (r != 0) {
 			archive_set_error(&a->archive, errno,
 			    "Can't stat existing object");
@@ -2531,8 +2543,8 @@ check_symlinks_fsobj(char *path, int *a_eno, struct archive_string *a_estr,
 #if !defined(HAVE_LSTAT)
 	/* Platform doesn't have lstat, so we can't look for symlinks. */
 	(void)path; /* UNUSED */
-	(void)error_number; /* UNUSED */
-	(void)error_string; /* UNUSED */
+	(void)a_eno; /* UNUSED */
+	(void)a_estr; /* UNUSED */
 	(void)flags; /* UNUSED */
 	return (ARCHIVE_OK);
 #else
@@ -3106,6 +3118,9 @@ create_dir(struct archive_write_disk *a, char *path)
 static int
 set_ownership(struct archive_write_disk *a)
 {
+#ifdef __vxworks
+	return (ARCHIVE_OK);
+#endif
 #ifndef __CYGWIN__
 /* unfortunately, on win32 there is no 'root' user with uid 0,
    so we just have to try the chown and see if it works */

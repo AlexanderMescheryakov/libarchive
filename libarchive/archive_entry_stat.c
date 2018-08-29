@@ -82,7 +82,9 @@ archive_entry_stat(struct archive_entry *entry)
 	 * On systems that support high-res timestamps, copy that
 	 * information into struct stat.
 	 */
-#if HAVE_STRUCT_STAT_ST_MTIMESPEC_TV_NSEC
+#ifdef __vxworks
+
+#elif HAVE_STRUCT_STAT_ST_MTIMESPEC_TV_NSEC
 	st->st_atimespec.tv_nsec = archive_entry_atime_nsec(entry);
 	st->st_ctimespec.tv_nsec = archive_entry_ctime_nsec(entry);
 	st->st_mtimespec.tv_nsec = archive_entry_mtime_nsec(entry);

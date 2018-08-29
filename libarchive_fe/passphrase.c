@@ -64,6 +64,18 @@ __FBSDID("$FreeBSD$");
 #include "err.h"
 #include "passphrase.h"
 
+#ifdef __vxworks
+char *
+readpassphrase(const char *prompt, char *buf, size_t bufsiz, int flags)
+{
+	return 0;
+}
+
+#define HAVE_READPASSPHRASE
+#define RPP_ECHO_OFF 0
+
+#endif
+
 #ifndef HAVE_READPASSPHRASE
 
 #define RPP_ECHO_OFF    0x00		/* Turn off echo (default). */
@@ -129,7 +141,9 @@ readpassphrase(const char *prompt, char *buf, size_t bufsiz, int flags)
 #endif
 #include <signal.h>
 #include <string.h>
+#ifndef __vxworks
 #include <termios.h>
+#endif
 #include <unistd.h>
 
 #ifndef _PATH_TTY

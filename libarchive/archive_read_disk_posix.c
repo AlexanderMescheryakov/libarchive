@@ -254,6 +254,8 @@ struct tree {
 	size_t			 entry_buff_size;
 };
 
+extern int stdin_pipe_fd;
+
 /* Definitions for tree.flags bitmap. */
 #define	hasStat		16 /* The st entry is valid. */
 #define	hasLstat	32 /* The lst entry is valid. */
@@ -1960,7 +1962,9 @@ close_and_restore_time(int fd, struct tree *t, struct restore_time *rt)
 #ifndef HAVE_UTIMES
 	(void)t; /* UNUSED */
 	(void)rt; /* UNUSED */
-	return (close(fd));
+    if (fd >= 0 && fd != stdin_pipe_fd)
+        return close(fd);
+	return (0);
 #else
 #if defined(HAVE_FUTIMENS) && !defined(__CYGWIN__)
 	struct timespec timespecs[2];
@@ -2472,7 +2476,11 @@ tree_current_lstat(struct tree *t)
 #else
 		if (tree_enter_working_dir(t) != 0)
 			return NULL;
+#ifdef __vxworks
+		if(0)
+#else
 		if (lstat(tree_current_access_path(t), &t->lst) != 0)
+#endif
 #endif
 			return NULL;
 		t->flags |= hasLstat;

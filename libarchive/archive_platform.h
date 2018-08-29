@@ -197,4 +197,8 @@
 #define	__LA_FALLTHROUGH
 #endif
 
+#ifdef __vxworks
+typedef long id_t;
+#endif
+
 #endif /* !ARCHIVE_PLATFORM_H_INCLUDED */

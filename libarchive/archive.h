@@ -138,6 +138,8 @@ typedef ssize_t la_ssize_t;
 # define __LA_DEPRECATED
 #endif
 
+extern int stdin_pipe_fd;
+
 #ifdef __cplusplus
 extern "C" {
 #endif

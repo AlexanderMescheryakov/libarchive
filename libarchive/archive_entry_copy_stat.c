@@ -36,7 +36,9 @@ __FBSDID("$FreeBSD: head/lib/libarchive/archive_entry_copy_stat.c 189466 2009-03
 void
 archive_entry_copy_stat(struct archive_entry *entry, const struct stat *st)
 {
-#if HAVE_STRUCT_STAT_ST_MTIMESPEC_TV_NSEC
+#if defined(__vxworks)
+
+#elif HAVE_STRUCT_STAT_ST_MTIMESPEC_TV_NSEC
 	archive_entry_set_atime(entry, st->st_atime, st->st_atimespec.tv_nsec);
 	archive_entry_set_ctime(entry, st->st_ctime, st->st_ctimespec.tv_nsec);
 	archive_entry_set_mtime(entry, st->st_mtime, st->st_mtimespec.tv_nsec);

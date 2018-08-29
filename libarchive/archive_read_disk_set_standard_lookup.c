@@ -227,6 +227,12 @@ lookup_uname_helper(struct name_cache *cache, id_t id)
 
 	return strdup(result->pw_name);
 }
+#elif defined( __vxworks)
+static const char *
+lookup_uname_helper(struct name_cache *cache, id_t id)
+{
+        return strdup("root");
+}
 #else
 static const char *
 lookup_uname_helper(struct name_cache *cache, id_t id)
@@ -293,6 +299,12 @@ lookup_gname_helper(struct name_cache *cache, id_t id)
 		return (NULL);
 
 	return strdup(result->gr_name);
+}
+#elif defined(__vxworks)
+static const char *
+lookup_gname_helper(struct name_cache *cache, id_t id)
+{
+        return strdup("root");
 }
 #else
 static const char *

@@ -130,7 +130,7 @@ static void		 version(void) __LA_DEAD;
 	 | ARCHIVE_EXTRACT_SECURE_NODOTDOT)
 
 int
-main(int argc, char **argv)
+bsdtar_main(int argc, char **argv, int fd)
 {
 	struct bsdtar		*bsdtar, bsdtar_storage;
 	int			 opt, t;
@@ -139,6 +139,8 @@ main(int argc, char **argv)
 	const char		*compress_program;
 	char			 possible_help_request;
 	char			 buff[16];
+    
+    stdin_pipe_fd = fd;
 
 	/*
 	 * Use a pointer for consistency, but stack-allocated storage
@@ -189,8 +191,12 @@ main(int argc, char **argv)
 #endif
 	possible_help_request = 0;
 
+#ifdef __vxworks
+	bsdtar->user_uid = 0;
+#else
 	/* Look up uid of current user for future reference */
 	bsdtar->user_uid = geteuid();
+#endif
 
 	/* Default: open tape drive. */
 	bsdtar->filename = getenv("TAPE");
@@ -877,6 +883,7 @@ main(int argc, char **argv)
 	if (bsdtar->return_value != 0)
 		lafe_warnc(0,
 		    "Error exit delayed from previous errors.");
+
 	return (bsdtar->return_value);
 }
 
